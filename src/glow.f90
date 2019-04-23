@@ -135,10 +135,10 @@
 
 ! First call only: set up energy grid:
 
-      if (ifirst == 1) then
-        ifirst = 0
-        call egrid (ener, del, nbins)
-      endif
+!      if (ifirst == 1) then
+!        ifirst = 0
+!        call egrid (ener, del, nbins)
+!      endif
 
 ! Find magnetic dip angle and solar zenith angle (radians):
 

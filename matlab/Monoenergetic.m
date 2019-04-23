@@ -1,4 +1,5 @@
-time = datenum(2015,12,13, 10,0,0);
+clear all;
+time = datenum(2008,03,26,11,0,0);
 glat = 65.1;
 glon = -147.5;
 Ap = 4;
@@ -20,7 +21,12 @@ Phitop = Phitop * 3000;
 % Axxxx wavelength in angstrom, intensity in Rayleigh 10^6 photons cm-2
 % density cgs cm-3
 iono = glowenergy(time, glat, glon, f107a, f107, f107p, Ap, Ebins, Phitop);
+%%
+figure;
+semilogx(iono.NeCalc,iono.alt);
 
-if interactive
-  plotglow(iono, time, glat, glon)
-end
+figure;
+semilogx(iono.energyBin,iono.phitop);
+% if interactive
+%   plotglow(iono, time, glat, glon)
+% end

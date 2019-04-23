@@ -31,7 +31,7 @@ use cglow,only: idate,utsec=>ut,glat,glong,f107a,f107,f107p,ap,ef,ec
 use cglow,only: iscale,jlocal,kchem,xuvfac
 use cglow,only: zz,zo,zn2,zo2,zns,znd,zno,ztn,ze,zti,zte
 use cglow,only: ener,del,phitop
-use cglow,only: tir,ecalc,zxden,zeta,vcb
+use cglow,only: tir,ecalc,zxden,zeta
 use cglow,only: cglow_init
 use cglow,only: data_dir, &
   production, loss
@@ -51,7 +51,7 @@ real(wp), allocatable :: pedcond(:), hallcond(:) ! Pederson and Hall conductivit
 real(wp), allocatable :: outf(:,:)               ! iri output (11,Nalt)
 real(wp) :: stl,fmono,emono
 real(wp) :: sw(25)
-integer :: j,ii,itail
+integer :: j,ii,itail,ix
 
 data sw/25*1./
 
@@ -94,49 +94,66 @@ call argv(5, f107a)
 call argv(6, f107)
 call argv(7, f107p)
 call argv(8, ap)
+call argv(9, nbins)
 
-call get_command_argument(9, buf)
-if(buf /= '-e') then
-  read(buf, *) ef  ! hemispherical flux
+allocate(ener(nbins), del(nbins), phitop(nbins))
 
-  call argv(10, ec) ! characteristic energy [eV]
-  call argv(11, nbins) ! number of energy bins
-  allocate(ener(nbins), del(nbins), phitop(nbins))
+do ix=1, nbins
+  call argv(9+ix, phitop(ix))
+end do
+
+!do ix=1, nbins
+!  call get_command_argument(ix,del(nbins))
+!end do
+
+do ix=1, nbins
+  call argv(9+nbins+ix, ener(ix))
+end do
+
+
+
+!call get_command_argument(9, buf)
+!if(buf /= '-e') then
+!  read(buf, *) ef  ! hemispherical flux
+
+!  call argv(10, ec) ! characteristic energy [eV]
+!  call argv(11, nbins) ! number of energy bins
+!  allocate(ener(nbins), del(nbins), phitop(nbins))
 
   !! Call EGRID to set up electron energy grid:
-  call egrid(ener, del, nbins)
+!  call egrid(ener, del, nbins)
 
   !! Call MAXT to put auroral electron flux specified into phitop array:
-  phitop(:) = 0.
-  if (ef>.001 .and. ec>1.) call maxt (ef,ec,ener,del,nbins,itail,fmono,emono,phitop)
-else
-  call argv(10, nbins)
-  allocate(ener(nbins), del(nbins), phitop(nbins))
+!  phitop(:) = 0.
+!  if (ef>.001 .and. ec>1.) call maxt (ef,ec,ener,del,nbins,itail,fmono,emono,phitop)
+!else
+!  call argv(10, nbins)
+!  allocate(ener(nbins), del(nbins), phitop(nbins))
 
-  block
-    integer :: u, ios
-    call get_command_argument(11, buf)
-    open(newunit=u, file=buf, access='stream', action='read', status='old')
+!  block
+!    integer :: u, ios
+!    call get_command_argument(11, buf)
+!    open(newunit=u, file=buf, access='stream', action='read', status='old')
 
     !> array filling real32 reads
-    read(u, iostat=ios) ener
-    read(u, iostat=ios) phitop
-    if(ios /= 0) then
-      write(stderr,*) 'failed to read input energy bin file ',trim(buf),' code',ios
-      if (ios < 0) write(stderr,*) 'was file truncated?'
-      stop 1
-    endif
+!    read(u, iostat=ios) ener
+!    read(u, iostat=ios) phitop
+!    if(ios /= 0) then
+!      write(stderr,*) 'failed to read input energy bin file ',trim(buf),' code',ios
+!      if (ios < 0) write(stderr,*) 'was file truncated?'
+!      stop 1
+!    endif
 
-    close(u)
-  endblock
-
-
+!    close(u)
+!  endblock
 
 
-  del(2:) = ener(2:) - ener(1:nbins-1)
-  del(1) = del(2) / 2  ! arbitrary
 
-endif
+
+  del(2:) = (ener(2:) - ener(1:nbins-1))/2
+  del(1) = del(2)  ! arbitrary
+
+!endif
 
 !! Call CGLOW_INIT (module CGLOW) to set array dimensions and allocate use-associated variables:
 call cglow_init
@@ -160,7 +177,7 @@ stl = modulo(stl, 24.)
 !   630., 640. ]
 
 
-z = alt_grid(Nalt=Nalt, minalt=73., dmin=0.01, dmax=4.)
+z = alt_grid(Nalt=Nalt, minalt=60., dmin=0.1, dmax=4.)
 !! Nalt: number of altitude bins
 !! minalt: lowest altitude in grid [km]
 !! dmin: grid spacing at minimum altitude [km]
@@ -186,7 +203,6 @@ do j=1,Nalt
 enddo
 
 !! Output
-
 write(stdout,"('Input1: 1.Nbins, 2.Nalt, 3.deltaEnergy, 4.energyBin, 5.phitop')")
 !> energy bins
 write(stdout, '(i4)') Nbins
@@ -221,11 +237,6 @@ write(stdout, "(f5.1, 12f12.2)") (z(j),(loss(ii,j), ii=1,nex), j=1,Nalt)
 write(stdout,"('Output5:')")
 write(stdout,'(A)') ' alt.   O+(2P)   O+(2D)   O+(4S)   N+   N2+   O2+   NO+    N2(A)    N(2P)   N(2D)    O(1S)   O(1D)'
 write(stdout, "(f5.1, 12f12.2)") (z(j), (zxden(ii,j), ii=1,nex), j=1,Nalt)
-
-write(stdout,"('Output6:')")
-write(stdout,'(A)') "   3371    4278    5200    5577    6300    7320   10400    " //&
-  "3644    7774    8446    3726    LBH     1356    1493    1304"
-write(stdout,"(1x,15f8.2)") (vcb(ii),ii=1,nw)
 
 
 

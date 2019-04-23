@@ -1,13 +1,79 @@
-function iono = glowparse(dat)
+%% Glow Fortran Tests
+time = datenum(2008,03,26,11,0,0);
+glat = 65.1;
+glon = -147.5;
+Ap = 4;
+%% solar radio flux [10-22 W m-2]
+f107 = 100;
+f107a = 100;
+f107p = 100;
 
+%% characteristic energy [eV]
+energyBin = (1:1:100);
+
+%% Number of energy bins
+% Nbins = length(energyBin);
+% Q = 1;
+%% flux [erg cm-2 s-1 == mW m-2 s-1]
+% phitop = 100*ones(1,Nbins).*Q./Nbins;
+% phitop(50) = 100;
+
+%% flux [erg cm-2 s-1 == mW m-2 s-1]
+Q = 1;
+%% characteristic energy [eV]
+Echar = 10e3;
+%% Number of energy bins
+Nbins = 250;
+
+exe = glowpath();
+[idate, utsec] = glowdate(time);
+
+cmd = [exe, ' ', idate,' ',utsec,' ',...
+       num2str([glat, glon, f107a, f107, f107p, Ap, Q, Echar, Nbins])];
+% cmd = [exe, ' ', idate,' ',utsec,' ',...
+%        num2str([glat, glon, f107a, f107, f107p, Ap, Nbins, phitop, energyBin])];
+[status,dat] = system(cmd);
+
+%%
+[output] = parse_data(dat);
+%%
+hold on;
+semilogx(output.A5577,output.alt);
+% hold on;
+% semilogx(output.NeCalc,output.alt);
+%%
+% figure; 
+% semilogx(input.energyBin,input.phitop);
+
+function [ener, del] = egrid(nbins)
+    for n=1:1:nbins
+        if n <= 21
+            ener(n) = 0.5*n;
+        else
+            ener(n) = exp(0.05 * (n+26));
+        end
+    end
+    
+    del(1) = 0.5;
+    
+    for n=2:1:nbins
+        del(n) = ener(n) - ener(n-1);
+    end
+    
+    for n=1:1:nbins
+        ener(n) = ener(n) -del(n)/2.0;
+    end
+    
+end
+
+function [iono] = parse_data(dat)
     datstr.input1  =  dat(regexp(dat,'Input1:')+7:regexp(dat,'Input2:')-1);
     datstr.input2  =  dat(regexp(dat,'Input2:')+7:regexp(dat,'Output1:')-1);
-    datstr.output1 =  dat(regexp(dat,'Output1:')+8:regexp(dat,'Output2:')-1);
-    datstr.output2 =  dat(regexp(dat,'Output2:')+8:regexp(dat,'Output3:')-1);
+    datstr.output1 = dat(regexp(dat,'Output1:')+8:regexp(dat,'Output2:')-1);
+    datstr.output2 = dat(regexp(dat,'Output2:')+8:regexp(dat,'Output3:')-1);
 %     datstr.output3 = dat(regexp(dat,'Output3:')+8:regexp(dat,'Output4:')-1);
 %     datstr.output4 = dat(regexp(dat,'Output4:')+8:regexp(dat,'Output5:')-1);
-%     datstr.output5 = dat(regexp(dat,'Output5:')+8:regexp(dat,'Output6:')-1);
-    datstr.output6 = dat(regexp(dat,'Output6:')+8:end);
+%     datstr.output5 = dat(regexp(dat,'Output5:')+8:end);
     
     % input1
     [buff, pos] = textscan(datstr.input1,'%s',5);
@@ -49,8 +115,4 @@ function iono = glowparse(dat)
     iono.A5577 = output2(:,5);
     iono.A6300 = output2(:,6);
     
-    output6 = cell2mat(textscan(datstr.output6(regexp(datstr.output6,'1304')+4:end),repmat('%f ',1,15)));
-    iono.R4278 = output6(:,2);
-    iono.R5577 = output6(:,4);
-    iono.R6300 = output6(:,5);
 end
