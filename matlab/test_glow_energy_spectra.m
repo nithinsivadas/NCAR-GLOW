@@ -11,48 +11,56 @@ f107p = 100;
 
 %% energy [eV]
 energyBin = logspace(1,6,250);
-Echar = 100e3;
+Echar1 = 1e3;
+Echar2 = 100e3;
 
 %% Number of energy bins
 Nbins = length(energyBin);
-Q = 1; %% energy flux [erg cm-2 s-1 == mW m-2 s-1  
-numberFlux = (Q*1e-3*1e-4./(1.6e-19))./Echar; %[cm-2 s-1]
+Q = 1; %% energy flux [erg cm-2 == mW m-2  
+numberFlux1 = (Q*1e-3*1e-4./(1.6e-19))./Echar1; %[cm-2 s-1]
+numberFlux2 = (Q*1e-3*1e-4./(1.6e-19))./Echar2; %[cm-2 s-1]
 phitop = zeros(1,Nbins);
-[~,iE] = min(abs(energyBin-Echar));
+[~,iE1] = min(abs(energyBin-Echar1));
+[~,iE2] = min(abs(energyBin-Echar2));
 binWidth = diff(energyBin);
 binWidth(Nbins) = binWidth(Nbins-1);
-phitop(iE) = numberFlux./binWidth(iE);
-energyBin(iE)
+phitop(iE1) = numberFlux1./binWidth(iE1);
+phitop(iE2) = numberFlux2./binWidth(iE2);
 
-%% flux [erg cm-2 s-1 == mW m-2 s-1]
-Q = 1;
-%% characteristic energy [eV]
-% Echar = 10e3;
-%% Number of energy bins
-% Nbins = 250;
+%% Running GLOW Energy - directly inputs energy spectra of your choosing
 
-iono = glowenergy(time, glat, glon, f107a, f107, f107p, Ap, energyBin, phitop);
+output = glowenergy(time, glat, glon, f107a, f107, f107p, Ap, energyBin, phitop);
 
-
-% exe = glowpath();
-% [idate, utsec] = glowdate(time);
-
-% cmd = [exe, ' ', idate,' ',utsec,' ',...
-%        num2str([glat, glon, f107a, f107, f107p, Ap, Q, Echar, Nbins])];
-% cmd = [exe, ' ', idate,' ',utsec,' ',...
-%        num2str([glat, glon, f107a, f107, f107p, Ap, Nbins, phitop, energyBin])];
-% [status,dat] = system(cmd);
-
-% %%
-% [output] = parse_data(dat);
 %%
-figure;
-% semilogx(output.A5577,output.alt);
-% hold on;
-semilogx(iono.A5577,iono.alt);
-%%
-% figure; 
-% semilogx(input.energyBin,input.phitop);
+%% Plotting
+figureHandle = figure;
+figureHandle.Units='normalized';
+
+subplot(1,3,1);
+loglog(output.energyBin,output.phitop+0.01);
+xlabel('Energy [eV]');
+ylabel({'Differential number flux of precipitating electrons','[cm^{-2} s^{-1} eV^{-1}]'});
+set(gca,'XTick',[10^0,10^2,10^4,10^6],'XLim',[10^0,10^6],'YLim',[10^0,10^8]);
+
+subplot(1,3,2);
+plot(output.totalIonizationRate,output.alt);
+xlabel({'Total Ionization Rate','[cm^{-3}s^{-1}]'});
+ylabel({'Altitude [km]'});
+title('Testing glowenergy.m');
+
+subplot(1,3,3);
+plot(output.A5577,output.alt,'g');
+hold on;
+plot(output.A4278,output.alt,'b');
+hold on;
+plot(output.A6300,output.alt,'r');
+xlabel({'Volume Emission Rate','[cm^{-3}s^{-1}]'});
+ylabel({'Altitude [km]'});
+legend('5577 A^{\circ}','4278 A^{\circ}','6300 A^{\circ}');
+
+figureHandle.Position = figureHandle.Position+[-0.25, 0, +0.25, 0];
+
+
 
 function [ener, del] = egrid(nbins)
     for n=1:1:nbins

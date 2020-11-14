@@ -1,4 +1,5 @@
 %% Glow Fortran Tests
+clear all;
 time = datenum(2008,03,26,11,0,0);
 glat = 65.1;
 glon = -147.5;
@@ -8,42 +9,39 @@ f107 = 100;
 f107a = 100;
 f107p = 100;
 
-%% characteristic energy [eV]
-energyBin = (1:1:100);
+%% energy [eV]
+energyBin = logspace(1,6,250);
+Echar = 100e3;
 
 %% Number of energy bins
-% Nbins = length(energyBin);
-% Q = 1;
-%% flux [erg cm-2 s-1 == mW m-2 s-1]
-% phitop = 100*ones(1,Nbins).*Q./Nbins;
-% phitop(50) = 100;
+Nbins = length(energyBin);
+Q = 1; %% energy flux [erg cm-2 == mW m-2  
+numberFlux = (Q*1e-3*1e-4./(1.6e-19))./Echar; %[cm-2 s-1]
+phitop = zeros(1,Nbins);
+[~,iE] = min(abs(energyBin-Echar));
+binWidth = diff(energyBin);
+binWidth(Nbins) = binWidth(Nbins-1);
+phitop(iE) = numberFlux./binWidth(iE);
+energyBin(iE)
 
-%% flux [erg cm-2 s-1 == mW m-2 s-1]
-Q = 1;
-%% characteristic energy [eV]
-Echar = 10e3;
-%% Number of energy bins
-Nbins = 250;
+%% Running GLOW Energy - directly
+output = glowenergy(time, glat, glon, f107a, f107, f107p, Ap, energyBin, phitop);
 
-%% Running GLOW
-
-[output] = glow(time, glat, glon, f107a, f107, f107p, Ap, Q, Echar, Nbins);
-
+%%
 %% Plotting
 figureHandle = figure;
 figureHandle.Units='normalized';
 
 subplot(1,3,1);
-loglog(output.energyBin,output.phitop+0.01);
+semilogx(output.energyBin,output.phitop);
 xlabel('Energy [eV]');
 ylabel({'Differential number flux of precipitating electrons','[cm^{-2} s^{-1} eV^{-1}]'});
-set(gca,'XTick',[10^0,10^2,10^4,10^6],'XLim',[10^0,10^6],'YLim',[10^0,10^8]);
+set(gca,'XTick',[10^0,10^2,10^4,10^6],'XLim',[10^0,10^6]);
 
 subplot(1,3,2);
 plot(output.totalIonizationRate,output.alt);
 xlabel({'Total Ionization Rate','[cm^{-3}s^{-1}]'});
 ylabel({'Altitude [km]'});
-title('Testing glow.m');
 
 subplot(1,3,3);
 plot(output.A5577,output.alt,'g');
@@ -56,6 +54,7 @@ ylabel({'Altitude [km]'});
 legend('5577 A^{\circ}','4278 A^{\circ}','6300 A^{\circ}');
 
 figureHandle.Position = figureHandle.Position+[-0.25, 0, +0.25, 0];
+
 
 
 function [ener, del] = egrid(nbins)
