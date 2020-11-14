@@ -1,9 +1,6 @@
 function iono = glow(time, glat, glon, f107a, f107, f107p, Ap, energyFlux, Echar, nEnergyBins)
 
-% energyFlux  - Energy flux is units of erg cm-2 , mW m-2
-% Echar       - characteristic energy is in [eV]
-% nEnergyBins - Number of energy bins between 1 eV and 1 MeV
-
+% Energy flux is 
 validateattributes(glat, {'numeric'}, {'scalar'})
 validateattributes(glon, {'numeric'}, {'scalar'})
 validateattributes(f107, {'numeric'}, {'positive', 'scalar'})

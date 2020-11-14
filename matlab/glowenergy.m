@@ -1,5 +1,8 @@
 function iono = glowenergy(time, glat, glon, f107a, f107, f107p, Ap, Ebins, Phitop)
 
+% Ebins  : 1-D energy bin array
+% Phitop : 1-D array of energy flux values corresponding to the energy in Ebins 
+
 validateattributes(glat, {'numeric'}, {'scalar'})
 validateattributes(glon, {'numeric'}, {'scalar'})
 validateattributes(f107, {'numeric'}, {'positive', 'scalar'})

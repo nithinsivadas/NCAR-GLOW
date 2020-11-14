@@ -1,30 +1,37 @@
-[![Build Status](https://travis-ci.com/scivision/NCAR-GLOW.svg?branch=cmake)](https://travis-ci.com/scivision/NCAR-GLOW)
+[![DOI](https://zenodo.org/badge/162534283.svg)](https://zenodo.org/badge/latestdoi/162534283)
+
+[![Actions Status](https://github.com/scivision/NCAR-GLOW/workflows/ci_linux/badge.svg)](https://github.com/scivision/NCAR-GLOW/actions)
+[![Actions Status](https://github.com/scivision/NCAR-GLOW/workflows/ci_macos/badge.svg)](https://github.com/scivision/NCAR-GLOW/actions)
+[![Actions Status](https://github.com/scivision/NCAR-GLOW/workflows/ci_windows/badge.svg)](https://github.com/scivision/NCAR-GLOW/actions)
 
 # GLOW
-The GLobal airglOW Model, independently and easily accessed from:
+
+The GLobal airglOW Model, independently and easily accessed from **Fortran 2003** compiler.
+Optionally available from scripting languages including:
 
 * Python &ge; 3.6
 * Matlab
 * GNU Octave &ge; 4.2
 * IDL / GDL
-* Fortran 2003
 
-We describe each language below, pick the one(s) that apply for you.
-They don't depend on each other.
+We describe each language below; pick the one(s) that apply for you.
 Python is the easiest and recommennded choice.
+A Fortran compiler is required in any case.
 
 ## Python
+
 Install/compile by:
+
 ```sh
-git clone https://github.com/scivision/ncar-glow
+git clone https://github.com/space-physics/ncar-glow
 
-cd ncar-glow
-
-pip install -e .
+pip install -e ncar-glow
 ```
+
 Confirm the install with:
+
 ```sh
-pytest
+pytest ncar-glow
 ```
 
 Then use examples such as:
@@ -39,7 +46,7 @@ import ncarglow as glow
 iono = glow.simple(time, glat, glon, Q, Echar, Nbins)
 ```
 
-`iono` is an 
+`iono` is an
 [xarray.Dataset](http://xarray.pydata.org/en/stable/generated/xarray.Dataset.html)
 containing outputs from GLOW, including:
 
@@ -50,21 +57,22 @@ containing outputs from GLOW, including:
 * many more, request if you want it.
 
 ## Fortran
+
 You can call this repo from a Meson wrap or CMake Fetch.
 To build Fortran code by itself, do either:
 
 ```sh
-meson build src
+meson build
 
-ninja -C build
+meson test -C build
 ```
 
 or
 
 ```sh
-cmake -B build -S src
+cmake -B build
 
-cmake --build build -j
+cmake --build build
 ```
 
 ### MPI / NetCDF
@@ -81,15 +89,12 @@ Otherwise, -O3 works fine.
 
 The Matlab interface is in the [matlab](./matlab) directory, and passes data to / from Glow over stdin / stdout pipes.
 
-First, compile the Fortran code by running [setup.m](./matlab/setup.m)
-
-Then,
-
 * Use built-in energy and altitude bins: [Simple.m](./matlab/Simple.m)
 * user input energy grid: [Monoenergetic.m](./matlab/Monoenergetic.m)
 
 NOTE: if using GNU Octave, version &ge; 4.2 is required for proper [textscan() functionality](https://www.gnu.org/software/octave/NEWS-4.2.html)
 
 ## IDL / GDL
+
 We have a small script for IDL / GDL thanks to Guy Grubbs.
-Let us know if you want this, we haven't taken the time to upload it yet. th
+Let us know if you want this, we haven't taken the time to upload it yet.

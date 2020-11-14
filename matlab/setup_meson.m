@@ -14,4 +14,8 @@ if status~=0, error(ret), end
 disp(ret)
 
 disp('Fortran compilation complete')
+
+disp('Testing the Fortran executable and the MATLAB Wrapper');
+test_mod;
+
 end

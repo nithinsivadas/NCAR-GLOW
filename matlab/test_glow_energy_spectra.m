@@ -10,15 +10,18 @@ f107a = 100;
 f107p = 100;
 
 %% energy [eV]
-energyBin = logspace(3,6,250);
+energyBin = logspace(1,6,250);
+Echar = 100e3;
 
 %% Number of energy bins
 Nbins = length(energyBin);
-Q = 1;
-%% flux [erg cm-2 s-1 == mW m-2 s-1]
-phitop = zeros(1,Nbins).*Q./Nbins;
-iE = 180;
-phitop(iE) = 10000;
+Q = 1; %% energy flux [erg cm-2 s-1 == mW m-2 s-1  
+numberFlux = (Q*1e-3*1e-4./(1.6e-19))./Echar; %[cm-2 s-1]
+phitop = zeros(1,Nbins);
+[~,iE] = min(abs(energyBin-Echar));
+binWidth = diff(energyBin);
+binWidth(Nbins) = binWidth(Nbins-1);
+phitop(iE) = numberFlux./binWidth(iE);
 energyBin(iE)
 
 %% flux [erg cm-2 s-1 == mW m-2 s-1]

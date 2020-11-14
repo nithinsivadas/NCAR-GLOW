@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import ncarglow as glow
 from datetime import datetime
-import ncarglow.plots as gp
+import ncarglow.plots as plot
 import numpy as np
 from matplotlib.pyplot import show
 
@@ -17,13 +17,13 @@ Nbins = 250
 # %% monoenergetic beam
 Ebins = np.logspace(np.log10(Emin), np.log10(Emax), Nbins).astype(np.float32)
 Phitop = np.zeros_like(Ebins)
-Phitop[abs(Ebins-E0).argmin()] = 1.
+Phitop[abs(Ebins - E0).argmin()] = 1.0
 Phitop = Phitop.astype(np.float32)
 # %% run glow
 iono = glow.ebins(time, glat, glon, Ebins, Phitop)
 # %% simple plots
-gp.precip(iono['precip'])
+plot.precip(iono["precip"])
 
-gp.ver(iono)
+plot.ver(iono)
 
 show()
