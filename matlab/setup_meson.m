@@ -4,6 +4,15 @@ function setup_meson(srcdir, builddir)
 validateattributes(srcdir,{'char'},{'vector'})
 validateattributes(builddir,{'char'},{'vector'})
 
+[flag,out] = system('meson --v');
+if flag==0 disp(['MESON version: ',out 10]); else error(out); end
+
+[flag,out] = system('ninja --version');
+if flag==0 disp(['NINJA version: ',out 10]); else error(out); end
+
+disp(['Dependencies check successfull.' 10,...
+    'If the installation fails, upgrade to the latest versions of the packages',...
+    10]);
 
 [status, ret] = system(['meson setup ',builddir,' ',srcdir]);
 if status~=0, error(ret), end
