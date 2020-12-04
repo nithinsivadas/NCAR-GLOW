@@ -25,12 +25,20 @@ disp(ret)
 disp('Fortran compilation complete')
 
 disp('Testing the Fortran executable and the MATLAB Wrapper');
-test_mod;
 
-disp('Testing glow.m: This function allows you to input a mono-energetic beam');
-test_glow;
+    try 
+    test_mod;
 
-disp('Testing glowenergy.m: This function allows you to input an energy spectra of your choice.');
-test_glow_energy_spectra;
+    disp('Testing glow.m: This function allows you to input a mono-energetic beam');
+    test_glow;
 
+    disp('Testing glowenergy.m: This function allows you to input an energy spectra of your choice.');
+    test_glow_energy_spectra;
+    
+    catch ME
+        
+        disp('Tests unsuccessful');
+        get_report(ME);
+    
+    end
 end

@@ -23,8 +23,4 @@ if flag==0 disp(['GFORTRAN version: ',out 10]); else error(out); end
 
 addpath(genpath(srcdir));
 
-try
-  setup_meson(srcdir, builddir)
-catch
-  setup_cmake(srcdir, builddir)
-end
+setup_meson(srcdir, builddir)
