@@ -37,8 +37,8 @@ disp('Testing the Fortran executable and the MATLAB Wrapper');
     
     catch ME
         
-        disp('Tests unsuccessful');
-        get_report(ME);
+        disp([10 'Tests unsuccessful' 10]);
+        getReport(ME);
     
     end
 end
